@@ -113,7 +113,7 @@ namespace De02
                     MASP = txtMa.Text.Trim(),
                     TENSP = txtTen.Text.Trim(),
                     NGAYNHAP = dtpNgayNhap.Value,
-                    MALOAI = (string)cbbLoai.SelectedValue // Lưu dưới dạng chuỗi 2 ký tự
+                    MALOAI = (string)cbbLoai.SelectedValue
                 };
 
                 themSanPhamToDatabase(newSanPham);
@@ -200,7 +200,6 @@ namespace De02
 
             if (string.IsNullOrEmpty(tenSanPham))
             {
-                // Hiển thị toàn bộ sản phẩm nếu textbox rỗng
                 using (SanPhamContexDB context = new SanPhamContexDB())
                 {
                     List<SANPHAM> listSanPham = context.SANPHAMs.ToList();
@@ -211,12 +210,9 @@ namespace De02
             {
                 using (SanPhamContexDB context = new SanPhamContexDB())
                 {
-                    // Tìm kiếm sản phẩm theo tên
                     var results = context.SANPHAMs
                                          .Where(sp => sp.TENSP.Contains(tenSanPham))
                                          .ToList();
-
-                    // Hiển thị kết quả tìm kiếm
                     BindGrid(results);
 
                     if (results.Count == 0)
@@ -225,10 +221,33 @@ namespace De02
                     }
                 }
             }
-            // Xóa nội dung textbox sau khi tìm kiếm
             txtTim.Clear();
         }
 
+        private void dgvSanPham_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Kiểm tra xem có phải click vào một dòng hợp lệ hay không
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvSanPham.Rows[e.RowIndex];
+
+                // Hiển thị thông tin lên các điều khiển
+                txtMa.Text = row.Cells[0].Value.ToString();
+                txtTen.Text = row.Cells[1].Value.ToString();
+                dtpNgayNhap.Value = DateTime.Parse(row.Cells[2].Value.ToString());
+
+                // Tìm và chọn giá trị của ComboBox dựa trên MALOAI
+                string maloai = row.Cells[3].Value.ToString();
+                for (int i = 0; i < cbbLoai.Items.Count; i++)
+                {
+                    if (((LOAISP)cbbLoai.Items[i]).MALOAI == maloai)
+                    {
+                        cbbLoai.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
 
     }
 }
